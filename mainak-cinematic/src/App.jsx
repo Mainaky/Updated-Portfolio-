@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import SkillBar from "./components/SkillBar";
 import ProjectShowcase from "./components/ProjectShowcase";
 import { NAV_LINKS, SKILLS, PROJECTS, EXPERIENCE, ABOUT_CARDS, SOCIAL } from "./data";
+import emailjs from "emailjs-com";
 
 // ─── tiny helpers ────────────────────────────────────────────────────────────
 const ACCENT = "#7c6fff";
@@ -38,12 +39,29 @@ export default function App() {
     document.getElementById(section.toLowerCase())?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+const handleSubmit = (e) => {
+  e.preventDefault();
+
+  emailjs.send(
+    "service_9k3qcde",        // ✔ tumhara service id
+    "template_fw64p8k",       // ✔ tumhara template id
+    {
+      name: formData.name,
+      email: formData.email,
+      message: formData.message,
+    },
+    "o0vlF1tk5B4fj0sAk"         // ⚠️ yaha apna public key daalo
+  )
+  .then(() => {
     setSent(true);
     setFormData({ name: "", email: "", message: "" });
     setTimeout(() => setSent(false), 3000);
-  };
+  })
+  .catch((error) => {
+    console.error("FAILED...", error);
+    alert("Error sending message");
+  });
+};
 
   // ─── shared styles ─────────────────────────────────────────────────────────
   const sectionLabel = {
@@ -214,7 +232,7 @@ export default function App() {
             paddingTop: 40, borderTop: "1px solid rgba(255,255,255,0.06)",
           }}>
             {[
-              ["7.55","CGPA"],["4+","ML Projects"],["1","Published Paper"],["96.2%","JEE Percentile"],
+              ["4+","ML Projects"],["1","Published Paper"],["96.2%","JEE Percentile"],
             ].map(([n,l]) => (
               <div key={l} style={{ textAlign: "center" }}>
                 <span style={{
@@ -546,3 +564,4 @@ function ExperienceCard({ exp }) {
     </div>
   );
 }
+
