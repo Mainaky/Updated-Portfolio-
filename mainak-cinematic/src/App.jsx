@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import SkillBar from "./components/SkillBar";
 import ProjectShowcase from "./components/ProjectShowcase";
 import { NAV_LINKS, SKILLS, PROJECTS, EXPERIENCE, ABOUT_CARDS, SOCIAL } from "./data";
-import emailjs from "emailjs-com";
+import emailjs from '@emailjs/browser';
 
 // ─── tiny helpers ────────────────────────────────────────────────────────────
 const ACCENT = "#7c6fff";
@@ -39,28 +39,23 @@ export default function App() {
     document.getElementById(section.toLowerCase())?.scrollIntoView({ behavior: "smooth" });
   };
 
-const handleSubmit = (e) => {
+const sendEmail = (e) => {
   e.preventDefault();
 
-  emailjs.send(
-    "service_9k3qcde",        // ✔ tumhara service id
-    "template_fw64p8k",       // ✔ tumhara template id
-    {
-      name: formData.name,
-      email: formData.email,
-      message: formData.message,
-    },
-    "o0vlF1tk5B4fj0sAk"         // ⚠️ yaha apna public key daalo
+  emailjs.sendForm(
+    'service_9k3qcde',
+    'template_fw64p8k',
+    e.target,
+    'o0vlF1tk5B4fj0sAk'
   )
   .then(() => {
-    setSent(true);
-    setFormData({ name: "", email: "", message: "" });
-    setTimeout(() => setSent(false), 3000);
+    alert("Message sent ✅");
   })
-  .catch((error) => {
-    console.error("FAILED...", error);
-    alert("Error sending message");
+  .catch(() => {
+    alert("Error ❌");
   });
+
+  e.target.reset();
 };
 
   // ─── shared styles ─────────────────────────────────────────────────────────
@@ -399,57 +394,98 @@ const handleSubmit = (e) => {
             Open to Data Science &amp; ML Engineering placements. Drop a message!
           </p>
 
-          <form onSubmit={handleSubmit}>
-            {[
-              { key: "name",  label: "Your Name",      type: "text",  ph: "Recruiter / Collaborator" },
-              { key: "email", label: "Email Address",   type: "email", ph: "you@company.com" },
-            ].map(({ key, label, type, ph }) => (
-              <div key={key} style={{ marginBottom: 20 }}>
-                <label style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,0.45)", fontFamily: mono, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 10 }}>{label}</label>
-                <input
-                  type={type} placeholder={ph} required
-                  value={formData[key]}
-                  onChange={e => setFormData({ ...formData, [key]: e.target.value })}
-                  onFocus={e  => e.target.style.borderColor = ACCENT}
-                  onBlur={e   => e.target.style.borderColor = "rgba(255,255,255,0.1)"}
-                  style={{
-                    width: "100%", padding: "14px 16px",
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    borderRadius: 12, color: "#e2e8f0", fontSize: 15,
-                    outline: "none", fontFamily: sans,
-                  }}
-                />
-              </div>
-            ))}
+          <form onSubmit={sendEmail}>
+  {[
+    { key: "name", label: "Your Name", type: "text", ph: "Recruiter / Collaborator" },
+    { key: "email", label: "Email Address", type: "email", ph: "you@company.com" },
+  ].map(({ key, label, type, ph }) => (
+    <div key={key} style={{ marginBottom: 20 }}>
+      <label style={{
+        display: "block",
+        fontSize: 11,
+        color: "rgba(255,255,255,0.45)",
+        fontFamily: mono,
+        textTransform: "uppercase",
+        letterSpacing: 1.5,
+        marginBottom: 10
+      }}>
+        {label}
+      </label>
 
-            <div style={{ marginBottom: 24 }}>
-              <label style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,0.45)", fontFamily: mono, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 10 }}>Message</label>
-              <textarea
-                placeholder="I'd love to collaborate / I have a placement opportunity..." required rows={5}
-                value={formData.message}
-                onChange={e => setFormData({ ...formData, message: e.target.value })}
-                onFocus={e  => e.target.style.borderColor = ACCENT}
-                onBlur={e   => e.target.style.borderColor = "rgba(255,255,255,0.1)"}
-                style={{
-                  width: "100%", padding: "14px 16px",
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: 12, color: "#e2e8f0", fontSize: 15,
-                  outline: "none", resize: "vertical", fontFamily: sans,
-                }}
-              />
-            </div>
+      <input
+        name={key}   // ✅ IMPORTANT
+        type={type}
+        placeholder={ph}
+        required
+        value={formData[key]}
+        onChange={e => setFormData({ ...formData, [key]: e.target.value })}
+        onFocus={e => e.target.style.borderColor = ACCENT}
+        onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.1)"}
+        style={{
+          width: "100%",
+          padding: "14px 16px",
+          background: "rgba(255,255,255,0.04)",
+          border: "1px solid rgba(255,255,255,0.1)",
+          borderRadius: 12,
+          color: "#e2e8f0",
+          fontSize: 15,
+          outline: "none",
+          fontFamily: sans,
+        }}
+      />
+    </div>
+  ))}
 
-            <button type="submit" style={{
-              width: "100%", padding: 16, borderRadius: 12,
-              background: sent ? "#2d6a4f" : ACCENT,
-              color: "#fff", border: "none", fontSize: 15,
-              fontWeight: 600, cursor: "pointer", transition: "background .3s",
-            }}>
-              {sent ? "✓ Message Sent!" : "Send Message →"}
-            </button>
-          </form>
+  {/* MESSAGE */}
+  <div style={{ marginBottom: 24 }}>
+    <label style={{
+      display: "block",
+      fontSize: 11,
+      color: "rgba(255,255,255,0.45)",
+      fontFamily: mono,
+      textTransform: "uppercase",
+      letterSpacing: 1.5,
+      marginBottom: 10
+    }}>
+      Message
+    </label>
+
+    <textarea
+      name="message"   // ✅ IMPORTANT
+      placeholder="I'd love to collaborate..."
+      required
+      rows={5}
+      value={formData.message}
+      onChange={e => setFormData({ ...formData, message: e.target.value })}
+      style={{
+        width: "100%",
+        padding: "14px 16px",
+        background: "rgba(255,255,255,0.04)",
+        border: "1px solid rgba(255,255,255,0.1)",
+        borderRadius: 12,
+        color: "#e2e8f0",
+        fontSize: 15,
+        outline: "none",
+        resize: "vertical",
+        fontFamily: sans,
+      }}
+    />
+  </div>
+
+  <button type="submit" style={{
+    width: "100%",
+    padding: 16,
+    borderRadius: 12,
+    background: ACCENT,
+    color: "#fff",
+    border: "none",
+    fontSize: 15,
+    fontWeight: 600,
+    cursor: "pointer"
+  }}>
+    Send Message →
+  </button>
+</form>
 
           {/* Social */}
           <div style={{ display: "flex", gap: 14, marginTop: 40, justifyContent: "center" }}>
